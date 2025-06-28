@@ -26,6 +26,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .antMatchers("/api/auth/**").permitAll()
                         .antMatchers("/error").permitAll()
+                        .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .cors();

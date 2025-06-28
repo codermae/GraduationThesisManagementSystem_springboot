@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.FinalGradeMapper">
+
+    <select id="selectStudentGradesPage" resultType="com.example.demo.dto.StudentGradeResponse">
+        SELECT
+        s.student_id,
+        s.name as studentName,
+        s.class as className,
+        s.major,
+        t.title as topicTitle,
+        tc.name as teacherName,
+        th.thesis_score as thesisScore,
+        th.remarks as thesisRemarks,
+        d.score as defenseScore,
+        d.comments as defenseComments,
+        fg.final_score as finalScore,
+        fg.calculated_at as calculatedAt
+        FROM Student s
+        LEFT JOIN TopicSelection ts ON s.student_id = ts.student_id
+        LEFT JOIN Topic t ON ts.topic_id = t.topic_id
+        LEFT JOIN Teacher tc ON ts.teacher_id = tc.teacher_id
+        LEFT JOIN Thesis th ON s.student_id = th.student_id
+        LEFT JOIN Defense d ON s.student_id = d.student_id
+        LEFT JOIN FinalGrade fg ON s.student_id = fg.student_id
+        <where>
+            <if test="request.studentId != null and request.studentId != ''">
+                AND s.student_id = #{request.studentId}
+            </if>
+            <if test="request.studentName != null and request.studentName != ''">
+                AND s.name LIKE CONCAT('%', #{request.studentName}, '%')
+            </if>
+            <if test="request.teacherId != null and request.teacherId != ''">
+                AND ts.teacher_id = #{request.teacherId}
+            </if>
+            <if test="request.className != null and request.className != ''">
+                AND s.class LIKE CONCAT('%', #{request.className}, '%')
+            </if>
+            <if test="request.major != null and request.major != ''">
+                AND s.major LIKE CONCAT('%', #{request.major}, '%')
+            </if>
+            <if test="request.minScore != null">
+                AND fg.final_score >= #{request.minScore}
+            </if>
+            <if test="request.maxScore != null">
+                AND fg.final_score &lt;= #{request.maxScore}
+            </if>
+        </where>
+        ORDER BY fg.final_score DESC, s.student_id ASC
+    </select>
+
+    <select id="selectGradeStatistics" resultType="com.example.demo.dto.GradeStatisticsResponse">
+        SELECT
+        COUNT(DISTINCT s.student_id) as totalStudents,
+        COUNT(DISTINCT fg.student_id) as gradedStudents,
+        (COUNT(DISTINCT s.student_id) - COUNT(DISTINCT fg.student_id)) as ungradedStudents,
+        AVG(fg.final_score) as averageScore,
+        MAX(fg.final_score) as maxScore,
+        MIN(fg.final_score) as minScore,
+        SUM(CASE WHEN fg.final_score >= 90 THEN 1 ELSE 0 END) as excellentCount,
+        SUM(CASE WHEN fg.final_score >= 80 AND fg.final_score &lt; 90 THEN 1 ELSE 0 END) as goodCount,
+        SUM(CASE WHEN fg.final_score >= 60 AND fg.final_score &lt; 80 THEN 1 ELSE 0 END) as passCount,
+        SUM(CASE WHEN fg.final_score &lt; 60 THEN 1 ELSE 0 END) as failCount
+        FROM Student s
+        LEFT JOIN TopicSelection ts ON s.student_id = ts.student_id
+        LEFT JOIN FinalGrade fg ON s.student_id = fg.student_id
+        <where>
+            <if test="teacherId != null and teacherId != ''">
+                AND ts.teacher_id = #{teacherId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectStudentGradeDetail" resultType="com.example.demo.dto.StudentGradeResponse">
+        SELECT
+            s.student_id,
+            s.name as studentName,
+            s.class as className,
+            s.major,
+            t.title as topicTitle,
+            tc.name as teacherName,
+            th.thesis_score as thesisScore,
+            th.remarks as thesisRemarks,
+            d.score as defenseScore,
+            d.comments as defenseComments,
+            fg.final_score as finalScore,
+            fg.calculated_at as calculatedAt
+        FROM Student s
+                 LEFT JOIN TopicSelection ts ON s.student_id = ts.student_id
+                 LEFT JOIN Topic t ON ts.topic_id = t.topic_id
+                 LEFT JOIN Teacher tc ON ts.teacher_id = tc.teacher_id
+                 LEFT JOIN Thesis th ON s.student_id = th.student_id
+                 LEFT JOIN Defense d ON s.student_id = d.student_id
+                 LEFT JOIN FinalGrade fg ON s.student_id = fg.student_id
+        WHERE s.student_id = #{studentId}
+    </select>
+
+    <select id="selectStudentGrades" resultType="com.example.demo.dto.StudentGradeResponse">
+        SELECT
+        s.student_id,
+        s.name as studentName,
+        th.thesis_score as thesisScore,
+        d.score as defenseScore,
+        fg.final_score as finalScore
+        FROM
+        student s
+        LEFT JOIN
+        thesis th ON s.student_id = th.student_id
+        LEFT JOIN
+        defense d ON s.student_id = d.student_id
+        LEFT JOIN
+        final_grade fg ON s.student_id = fg.student_id
+        WHERE
+        s.student_id IN <foreach item="studentId" index="index" collection="studentIds" open="(" separator="," close=")">
+        #{studentId}
+    </foreach>
+    </select>
+
+    <select id="selectGradeAnalysis" resultType="map">
+        SELECT
+        AVG(final_score) AS averageScore,
+        MAX(final_score) AS maxScore,
+        MIN(final_score) AS minScore,
+        COUNT(CASE WHEN final_score >= 90 THEN 1 END) AS excellentCount,
+        COUNT(CASE WHEN final_score BETWEEN 80 AND 89 THEN 1 END) AS goodCount,
+        COUNT(CASE WHEN final_score BETWEEN 70 AND 79 THEN 1 END) AS mediumCount,
+        COUNT(CASE WHEN final_score BETWEEN 60 AND 69 THEN 1 END) AS passCount,
+        COUNT(CASE WHEN final_score &lt; 60 THEN 1 END) AS failCount
+        FROM final_grade
+        WHERE student_id IN (
+        SELECT student_id FROM topic_selection WHERE teacher_id = #{teacherId}
+        )
+    </select>
+
+</mapper>
