@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.TopicMapper">
+
+    <!-- TopicResponse结果映射 -->
+    <resultMap id="TopicResponseMap" type="com.example.demo.dto.TopicResponse">
+        <id column="topic_id" property="topicId"/>
+        <result column="title" property="title"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="teacher_name" property="teacherName"/>
+        <result column="department_name" property="departmentName"/>
+        <result column="difficulty" property="difficulty"/>
+        <result column="direction" property="direction"/>
+        <result column="content" property="content"/>
+        <result column="is_selected" property="isSelected"/>
+        <result column="selected_student_id" property="selectedStudentId"/>
+        <result column="selected_student_name" property="selectedStudentName"/>
+        <result column="selection_date" property="selectionDate"/>
+    </resultMap>
+
+    <!-- 分页查询题目列表 -->
+    <select id="selectTopicPage" resultMap="TopicResponseMap">
+        SELECT
+        t.topic_id,
+        t.title,
+        t.teacher_id,
+        teacher.name as teacher_name,
+        teacher.department as department_name,
+        t.difficulty,
+        t.direction,
+        t.content,
+        CASE WHEN ts.student_id IS NOT NULL THEN 1 ELSE 0 END as is_selected,
+        ts.student_id as selected_student_id,
+        s.name as selected_student_name,
+        ts.selection_date
+        FROM Topic t
+        LEFT JOIN Teacher teacher ON t.teacher_id = teacher.teacher_id
+        LEFT JOIN TopicSelection ts ON t.topic_id = ts.topic_id
+        LEFT JOIN Student s ON ts.student_id = s.student_id
+        <where>
+            <if test="req.title != null and req.title != ''">
+                AND t.title LIKE CONCAT('%', #{req.title}, '%')
+            </if>
+            <if test="req.difficulty != null and req.difficulty != ''">
+                AND t.difficulty = #{req.difficulty}
+            </if>
+            <if test="req.direction != null and req.direction != ''">
+                AND t.direction LIKE CONCAT('%', #{req.direction}, '%')
+            </if>
+            <if test="req.teacherId != null and req.teacherId != ''">
+                AND t.teacher_id = #{req.teacherId}
+            </if>
+            <if test="req.isSelected != null">
+                <choose>
+                    <when test="req.isSelected == true">
+                        AND ts.student_id IS NOT NULL
+                    </when>
+                    <otherwise>
+                        AND ts.student_id IS NULL
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+        ORDER BY t.topic_id DESC
+    </select>
+
+    <!-- 查询题目详细信息 -->
+    <select id="selectTopicDetail" resultMap="TopicResponseMap">
+        SELECT
+            t.topic_id,
+            t.title,
+            t.teacher_id,
+            teacher.name as teacher_name,
+            teacher.department as department_name,
+            t.difficulty,
+            t.direction,
+            t.content,
+            CASE WHEN ts.student_id IS NOT NULL THEN 1 ELSE 0 END as is_selected,
+            ts.student_id as selected_student_id,
+            s.name as selected_student_name,
+            ts.selection_date
+        FROM Topic t
+                 LEFT JOIN Teacher teacher ON t.teacher_id = teacher.teacher_id
+                 LEFT JOIN TopicSelection ts ON t.topic_id = ts.topic_id
+                 LEFT JOIN Student s ON ts.student_id = s.student_id
+        WHERE t.topic_id = #{topicId}
+    </select>
+
+    <!-- 查询教师发布的题目列表 -->
+    <select id="selectTopicsByTeacher" resultMap="TopicResponseMap">
+        SELECT
+            t.topic_id,
+            t.title,
+            t.teacher_id,
+            teacher.name as teacher_name,
+            teacher.department as department_name,
+            t.difficulty,
+            t.direction,
+            t.content,
+            CASE WHEN ts.student_id IS NOT NULL THEN 1 ELSE 0 END as is_selected,
+            ts.student_id as selected_student_id,
+            s.name as selected_student_name,
+            ts.selection_date
+        FROM Topic t
+                 LEFT JOIN Teacher teacher ON t.teacher_id = teacher.teacher_id
+                 LEFT JOIN TopicSelection ts ON t.topic_id = ts.topic_id
+                 LEFT JOIN Student s ON ts.student_id = s.student_id
+        WHERE t.teacher_id = #{teacherId}
+        ORDER BY t.topic_id DESC
+    </select>
+
+</mapper>
