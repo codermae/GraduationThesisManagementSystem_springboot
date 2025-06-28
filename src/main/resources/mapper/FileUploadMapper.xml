@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.FileUploadMapper">
+
+    <resultMap id="FileResponseMap" type="com.example.demo.dto.FileResponse">
+        <id property="fileId" column="file_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="studentName" column="student_name"/>
+        <result property="fileName" column="file_name"/>
+        <result property="originalName" column="original_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileType" column="file_type"/>
+        <result property="fileCategory" column="file_category"/>
+        <result property="uploadTime" column="upload_time"/>
+        <result property="remarks" column="remarks"/>
+    </resultMap>
+
+    <select id="selectFilePageWithStudent" resultMap="FileResponseMap">
+        SELECT
+        f.file_id,
+        f.student_id,
+        s.name as student_name,
+        f.file_name,
+        f.original_name,
+        f.file_size,
+        f.file_type,
+        f.file_category,
+        f.upload_time,
+        f.remarks
+        FROM file_upload f
+        LEFT JOIN Student s ON f.student_id = s.student_id
+        WHERE f.is_deleted = 0
+        <if test="req.studentId != null and req.studentId != ''">
+            AND f.student_id = #{req.studentId}
+        </if>
+        <if test="req.fileName != null and req.fileName != ''">
+            AND f.original_name LIKE CONCAT('%', #{req.fileName}, '%')
+        </if>
+        <if test="req.fileCategory != null and req.fileCategory != ''">
+            AND f.file_category = #{req.fileCategory}
+        </if>
+        <if test="req.fileType != null and req.fileType != ''">
+            AND f.file_type = #{req.fileType}
+        </if>
+        ORDER BY f.upload_time DESC
+    </select>
+
+    <select id="selectFilesByStudentId" resultMap="FileResponseMap">
+        SELECT
+            f.file_id,
+            f.student_id,
+            s.name as student_name,
+            f.file_name,
+            f.original_name,
+            f.file_size,
+            f.file_type,
+            f.file_category,
+            f.upload_time,
+            f.remarks
+        FROM file_upload f
+                 LEFT JOIN Student s ON f.student_id = s.student_id
+        WHERE f.is_deleted = 0 AND f.student_id = #{studentId}
+        ORDER BY f.upload_time DESC
+    </select>
+
+    <select id="selectByFileIdAndStudentId" resultType="com.example.demo.entity.FileUpload">
+        SELECT * FROM file_upload
+        WHERE file_id = #{fileId} AND student_id = #{studentId} AND is_deleted = 0
+    </select>
+
+    <select id="selectFileStatistics" resultType="com.example.demo.dto.FileStatisticsResponse">
+        SELECT
+        COUNT(*) as totalFiles,
+        COALESCE(SUM(file_size), 0) as totalSize,
+        SUM(CASE WHEN file_category = 'PROPOSAL' THEN 1 ELSE 0 END) as proposalCount,
+        SUM(CASE WHEN file_category = 'REPORT' THEN 1 ELSE 0 END) as reportCount,
+        SUM(CASE WHEN file_category = 'THESIS' THEN 1 ELSE 0 END) as thesisCount,
+        SUM(CASE WHEN file_category = 'OTHER' THEN 1 ELSE 0 END) as otherCount
+        FROM file_upload
+        WHERE is_deleted = 0
+        <if test="studentId != null and studentId != ''">
+            AND student_id = #{studentId}
+        </if>
+    </select>
+
+    <select id="selectBatchByFileIdsAndStudentId" resultType="com.example.demo.entity.FileUpload">
+        SELECT * FROM file_upload
+        WHERE file_id IN
+        <foreach collection="fileIds" item="fileId" open="(" close=")" separator=",">
+            #{fileId}
+        </foreach>
+        AND student_id = #{studentId} AND is_deleted = 0
+    </select>
+
+</mapper>
