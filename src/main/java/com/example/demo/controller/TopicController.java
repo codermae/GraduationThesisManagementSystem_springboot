@@ -137,6 +137,42 @@ public class TopicController {
         List<TopicSelection> selections = topicService.getSelectionsByTeacher(currentUserId);
         return Result.success(selections);
     }
+    /**
+     * 获取老师名下的学生信息列表（包含选题、论文、答辩等详细信息）
+     */
+    @GetMapping("/my-students-info")
+    public Result<List<StudentInfoResponse>> getMyStudentsInfo(HttpServletRequest request) {
+        String currentUserId = UserContextUtil.getCurrentUserId(request);
+        String currentRole = UserContextUtil.getCurrentUserRole(request);
+
+        if (!"teacher".equals(currentRole)) {
+            return Result.error("只有教师可以查看指导的学生信息");
+        }
+
+        List<StudentInfoResponse> studentsInfo = topicService.getStudentsInfoByTeacher(currentUserId);
+        return Result.success(studentsInfo);
+    }
+    /**
+     * 获取指定学生的详细信息（老师专用）
+     */
+    @GetMapping("/student-detail/{studentId}")
+    public Result<StudentInfoResponse> getStudentDetail(@PathVariable String studentId, HttpServletRequest request) {
+        String currentUserId = UserContextUtil.getCurrentUserId(request);
+        String currentRole = UserContextUtil.getCurrentUserRole(request);
+
+        if (!"teacher".equals(currentRole)) {
+            return Result.error("只有教师可以查看学生详细信息");
+        }
+
+        // 验证该学生是否是当前老师指导的学生
+        boolean isMyStudent = topicService.isTeacherStudent(currentUserId, studentId);
+        if (!isMyStudent) {
+            return Result.error("您无权查看该学生信息");
+        }
+
+        StudentInfoResponse studentInfo = topicService.getStudentDetailInfo(studentId);
+        return Result.success(studentInfo);
+    }
 
     /**
      * 查询题目的选择情况（教师）

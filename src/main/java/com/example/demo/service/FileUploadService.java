@@ -8,6 +8,7 @@ import com.example.demo.entity.FileUpload;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FileUploadService extends IService<FileUpload> {
 
@@ -40,6 +41,21 @@ public interface FileUploadService extends IService<FileUpload> {
      * 获取文件统计信息
      */
     FileStatisticsResponse getFileStatistics(String studentId);
+
+    /**
+     * 获取指定学生的文件列表（按类别分组）
+     * @param studentId 学生ID
+     * @return 按文件类别分组的文件列表
+     */
+    Map<String, List<FileResponse>> getStudentFilesByCategory(String studentId);
+
+
+    /**
+     * 获取老师指导的所有学生的文件汇总
+     * @param teacherId 教师ID
+     * @return 文件汇总信息
+     */
+    Map<String, Object> getTeacherStudentsFiles(String teacherId);
 
     /**
      * 批量删除文件

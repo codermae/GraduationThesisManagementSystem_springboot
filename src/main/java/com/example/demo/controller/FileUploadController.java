@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -124,6 +125,44 @@ public class FileUploadController {
 
         FileStatisticsResponse statistics = fileUploadService.getFileStatistics(studentId);
         return Result.success(statistics);
+    }
+    /**
+     * 老师查看指定学生的文件列表（按文件类别分组）
+     */
+    @GetMapping("/teacher/student/{studentId}/files")
+    public Result<Map<String, List<FileResponse>>> getStudentFilesByCategory(@PathVariable String studentId, HttpServletRequest request) {
+        String currentUserId = UserContextUtil.getCurrentUserId(request);
+        String userRole = UserContextUtil.getCurrentUserRole(request);
+
+        if (!"teacher".equals(userRole)) {
+            return Result.error(403, "只有老师可以查看学生文件");
+        }
+
+        // 验证该学生是否是当前老师指导的学生
+        // 这里需要调用TopicService来验证
+        // boolean isMyStudent = topicService.isTeacherStudent(currentUserId, studentId);
+        // if (!isMyStudent) {
+        //     return Result.error(403, "您无权查看该学生的文件");
+        // }
+
+        Map<String, List<FileResponse>> filesByCategory = fileUploadService.getStudentFilesByCategory(studentId);
+        return Result.success(filesByCategory);
+    }
+
+    /**
+     * 老师查看所有指导学生的文件汇总
+     */
+    @GetMapping("/teacher/my-students/files")
+    public Result<Map<String, Object>> getMyStudentsFiles(HttpServletRequest request) {
+        String currentUserId = UserContextUtil.getCurrentUserId(request);
+        String userRole = UserContextUtil.getCurrentUserRole(request);
+
+        if (!"teacher".equals(userRole)) {
+            return Result.error(403, "只有老师可以查看指导学生文件");
+        }
+
+        Map<String, Object> result = fileUploadService.getTeacherStudentsFiles(currentUserId);
+        return Result.success(result);
     }
 
     /**

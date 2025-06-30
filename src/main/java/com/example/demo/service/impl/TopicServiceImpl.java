@@ -69,6 +69,9 @@ public class TopicServiceImpl implements TopicService {
         }
 
         if (!currentUserId.equals(existingTopic.getTeacherId())) {
+            System.out.println(currentUserId);
+            System.out.println(existingTopic.getTeacherId());
+            System.out.println(!currentUserId.equals(existingTopic.getTeacherId()));
             throw new RuntimeException("只能修改自己发布的题目");
         }
 
@@ -218,5 +221,21 @@ public class TopicServiceImpl implements TopicService {
      */
     private String generateTopicId() {
         return "T" + System.currentTimeMillis() + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    }
+
+    @Override
+    public List<StudentInfoResponse> getStudentsInfoByTeacher(String teacherId) {
+        return topicMapper.selectStudentsInfoByTeacher(teacherId);
+    }
+
+    @Override
+    public StudentInfoResponse getStudentDetailInfo(String studentId) {
+        return topicMapper.selectStudentDetailInfo(studentId);
+    }
+
+    @Override
+    public boolean isTeacherStudent(String teacherId, String studentId) {
+        int count = topicMapper.countTeacherStudent(teacherId, studentId);
+        return count > 0;
     }
 }

@@ -23,8 +23,11 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -240,5 +243,45 @@ public class FileUploadServiceImpl extends ServiceImpl<FileUploadMapper, FileUpl
         response.setRemarks(fileUpload.getRemarks());
         response.setDownloadUrl(downloadUrlPrefix + fileUpload.getFileId());
         return response;
+    }
+
+    @Override
+    public Map<String, List<FileResponse>> getStudentFilesByCategory(String studentId) {
+        List<FileResponse> files = fileUploadMapper.selectFilesByStudentId(studentId);
+
+        // 按文件类别分组
+        Map<String, List<FileResponse>> filesByCategory = files.stream()
+                .collect(Collectors.groupingBy(file ->
+                        FileConstants.getCategoryName(file.getFileCategory())
+                ));
+
+        return filesByCategory;
+    }
+
+    @Override
+    public Map<String, Object> getTeacherStudentsFiles(String teacherId) {
+        // 获取老师指导的所有学生文件
+        List<FileResponse> allFiles = fileUploadMapper.selectFilesByTeacher(teacherId);
+
+        // 统计信息
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalFiles", allFiles.size());
+        result.put("totalSize", allFiles.stream().mapToLong(FileResponse::getFileSize).sum());
+
+        // 按学生分组
+        Map<String, List<FileResponse>> filesByStudent = allFiles.stream()
+                .collect(Collectors.groupingBy(FileResponse::getStudentId));
+
+        // 按文件类别统计
+        Map<String, Long> filesByCategory = allFiles.stream()
+                .collect(Collectors.groupingBy(
+                        file -> FileConstants.getCategoryName(file.getFileCategory()),
+                        Collectors.counting()
+                ));
+
+        result.put("filesByStudent", filesByStudent);
+        result.put("filesByCategory", filesByCategory);
+
+        return result;
     }
 }

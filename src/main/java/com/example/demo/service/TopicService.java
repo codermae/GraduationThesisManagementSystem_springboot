@@ -57,6 +57,27 @@ public interface TopicService {
      * 查询教师指导的学生选题情况
      */
     List<TopicSelection> getSelectionsByTeacher(String teacherId);
+    /**
+     * 获取老师名下的学生信息列表
+     * @param teacherId 教师ID
+     * @return 学生信息列表
+     */
+    List<StudentInfoResponse> getStudentsInfoByTeacher(String teacherId);
+
+    /**
+     * 获取指定学生的详细信息
+     * @param studentId 学生ID
+     * @return 学生详细信息
+     */
+    StudentInfoResponse getStudentDetailInfo(String studentId);
+
+    /**
+     * 验证学生是否是指定老师的学生
+     * @param teacherId 教师ID
+     * @param studentId 学生ID
+     * @return 是否是该老师的学生
+     */
+    boolean isTeacherStudent(String teacherId, String studentId);
 
     /**
      * 查询某个题目的选择情况

@@ -3,6 +3,7 @@ package com.example.demo.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.demo.dto.StudentInfoResponse;
 import com.example.demo.dto.TopicQueryRequest;
 import com.example.demo.dto.TopicResponse;
 import com.example.demo.entity.Topic;
@@ -47,4 +48,27 @@ public interface TopicMapper extends BaseMapper<Topic> {
             "JOIN Teacher teacher ON ts.teacher_id = teacher.teacher_id " +
             "WHERE ts.student_id = #{studentId}")
     TopicResponse selectStudentSelectedTopic(@Param("studentId") String studentId);
+
+    /**
+     * 查询指定教师名下的学生信息
+     * @param teacherId 教师ID
+     * @return 学生信息列表
+     */
+    List<StudentInfoResponse> selectStudentsInfoByTeacher(@Param("teacherId") String teacherId);
+
+    /**
+     * 查询指定学生的详细信息
+     * @param studentId 学生ID
+     * @return 学生详细信息
+     */
+    StudentInfoResponse selectStudentDetailInfo(@Param("studentId") String studentId);
+
+    /**
+     * 验证学生是否是指定老师的学生
+     * @param teacherId 教师ID
+     * @param studentId 学生ID
+     * @return 记录数
+     */
+    int countTeacherStudent(@Param("teacherId") String teacherId, @Param("studentId") String studentId);
+
 }

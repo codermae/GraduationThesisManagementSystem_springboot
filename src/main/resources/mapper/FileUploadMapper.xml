@@ -93,4 +93,37 @@
         AND student_id = #{studentId} AND is_deleted = 0
     </select>
 
+    <!-- 查询指定老师指导的所有学生的文件列表 -->
+    <select id="selectFilesByTeacher" resultMap="FileResponseMap">
+        SELECT
+            f.file_id,
+            f.student_id,
+            s.name as student_name,
+            f.file_name,
+            f.original_name,
+            f.file_size,
+            f.file_type,
+            f.file_category,
+            f.upload_time,
+            f.remarks
+        FROM file_upload f
+                 INNER JOIN TopicSelection ts ON f.student_id = ts.student_id
+                 INNER JOIN Student s ON f.student_id = s.student_id
+        WHERE ts.teacher_id = #{teacherId}
+          AND f.is_deleted = 0
+        ORDER BY f.upload_time DESC
+    </select>
+
+    <!-- 查询指定老师指导的学生文件统计信息 -->
+    <select id="selectTeacherStudentsFileStatistics" resultType="map">
+        SELECT
+            COUNT(*) as totalFiles,
+            SUM(f.file_size) as totalSize,
+            COUNT(DISTINCT f.student_id) as studentCount
+        FROM file_upload f
+                 INNER JOIN TopicSelection ts ON f.student_id = ts.student_id
+        WHERE ts.teacher_id = #{teacherId}
+          AND f.is_deleted = 0
+    </select>
+
 </mapper>

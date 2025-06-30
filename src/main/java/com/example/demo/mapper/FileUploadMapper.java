@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface FileUploadMapper extends BaseMapper<FileUpload> {
@@ -35,6 +36,21 @@ public interface FileUploadMapper extends BaseMapper<FileUpload> {
      * 获取文件统计信息
      */
     FileStatisticsResponse selectFileStatistics(@Param("studentId") String studentId);
+
+    /**
+     * 查询指定老师指导的所有学生的文件列表
+     * @param teacherId 教师ID
+     * @return 文件列表
+     */
+    List<FileResponse> selectFilesByTeacher(@Param("teacherId") String teacherId);
+
+
+    /**
+     * 查询指定老师指导的学生文件统计信息
+     * @param teacherId 教师ID
+     * @return 统计信息
+     */
+    Map<String, Object> selectTeacherStudentsFileStatistics(@Param("teacherId") String teacherId);
 
     /**
      * 批量查询文件（用于批量删除权限验证）

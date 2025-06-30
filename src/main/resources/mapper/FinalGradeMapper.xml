@@ -109,9 +109,9 @@
         LEFT JOIN
         defense d ON s.student_id = d.student_id
         LEFT JOIN
-        final_grade fg ON s.student_id = fg.student_id
+        finalgrade fg ON s.student_id = fg.student_id
         WHERE
-        s.student_id IN <foreach item="studentId" index="index" collection="studentIds" open="(" separator="," close=")">
+        s.student_id IN <foreach item="studentId" index="index" collection="list" open="(" separator="," close=")">
         #{studentId}
     </foreach>
     </select>

@@ -109,4 +109,83 @@
         ORDER BY t.topic_id DESC
     </select>
 
+    <!-- 查询指定教师名下的学生信息 -->
+    <select id="selectStudentsInfoByTeacher" resultType="com.example.demo.dto.StudentInfoResponse">
+        SELECT
+            s.student_id as studentId,
+            s.name as studentName,
+            s.class as className,
+            s.major as major,
+            ts.topic_id as topicId,
+            t.title as topicTitle,
+            ts.selection_date as selectionDate,
+            th.thesis_score as thesisScore,
+            th.remarks as thesisRemarks,
+            d.score as defenseScore,
+            d.comments as defenseComments,
+            fg.final_score as finalScore,
+            COALESCE(file_stats.file_count, 0) as fileCount,
+            COALESCE(file_stats.total_file_size, 0) as totalFileSize
+        FROM TopicSelection ts
+                 INNER JOIN Student s ON ts.student_id = s.student_id
+                 INNER JOIN Topic t ON ts.topic_id = t.topic_id
+                 LEFT JOIN Thesis th ON s.student_id = th.student_id
+                 LEFT JOIN Defense d ON s.student_id = d.student_id
+                 LEFT JOIN FinalGrade fg ON s.student_id = fg.student_id
+                 LEFT JOIN (
+            SELECT
+                student_id,
+                COUNT(*) as file_count,
+                SUM(file_size) as total_file_size
+            FROM file_upload
+            WHERE is_deleted = 0
+            GROUP BY student_id
+        ) file_stats ON s.student_id = file_stats.student_id
+        WHERE ts.teacher_id = #{teacherId}
+        ORDER BY ts.selection_date DESC
+    </select>
+
+    <!-- 查询指定学生的详细信息 -->
+    <select id="selectStudentDetailInfo" resultType="com.example.demo.dto.StudentInfoResponse">
+        SELECT
+            s.student_id as studentId,
+            s.name as studentName,
+            s.class as className,
+            s.major as major,
+            ts.topic_id as topicId,
+            t.title as topicTitle,
+            ts.selection_date as selectionDate,
+            th.thesis_score as thesisScore,
+            th.remarks as thesisRemarks,
+            d.score as defenseScore,
+            d.comments as defenseComments,
+            fg.final_score as finalScore,
+            COALESCE(file_stats.file_count, 0) as fileCount,
+            COALESCE(file_stats.total_file_size, 0) as totalFileSize
+        FROM Student s
+                 LEFT JOIN TopicSelection ts ON s.student_id = ts.student_id
+                 LEFT JOIN Topic t ON ts.topic_id = t.topic_id
+                 LEFT JOIN Thesis th ON s.student_id = th.student_id
+                 LEFT JOIN Defense d ON s.student_id = d.student_id
+                 LEFT JOIN FinalGrade fg ON s.student_id = fg.student_id
+                 LEFT JOIN (
+            SELECT
+                student_id,
+                COUNT(*) as file_count,
+                SUM(file_size) as total_file_size
+            FROM file_upload
+            WHERE is_deleted = 0
+            GROUP BY student_id
+        ) file_stats ON s.student_id = file_stats.student_id
+        WHERE s.student_id = #{studentId}
+    </select>
+
+    <!-- 验证学生是否是指定老师的学生 -->
+    <select id="countTeacherStudent" resultType="int">
+        SELECT COUNT(*)
+        FROM TopicSelection ts
+        WHERE ts.teacher_id = #{teacherId}
+          AND ts.student_id = #{studentId}
+    </select>
+
 </mapper>

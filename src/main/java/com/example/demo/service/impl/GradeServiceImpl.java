@@ -326,7 +326,20 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     public byte[] exportGrades(GradeExportRequest request) {
-        List<StudentGradeResponse> gradeList = finalGradeMapper.selectStudentGrades(request.getStudentIds());
+        // 如果没有指定学生ID列表，则获取所有学生
+        List<String> studentIds = request.getStudentIds();
+        if (studentIds == null || studentIds.isEmpty()) {
+            // 这里可以根据其他条件获取学生列表
+            // 暂时返回空列表的处理
+            throw new GradeBusinessException("请选择要导出的学生");
+        }
+
+        // 调用mapper方法，直接传递List<String>
+        List<StudentGradeResponse> gradeList = finalGradeMapper.selectStudentGrades(studentIds);
+
+        if (gradeList == null || gradeList.isEmpty()) {
+            throw new GradeBusinessException("没有找到学生成绩数据");
+        }
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("学生成绩");
@@ -350,14 +363,21 @@ public class GradeServiceImpl implements GradeService {
                 row.createCell(4).setCellValue(grade.getFinalScore() != null ? grade.getFinalScore().doubleValue() : 0);
             }
 
+            // 自动调整列宽
+            for (int i = 0; i < 5; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
             // 写入字节数组
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
             return outputStream.toByteArray();
         } catch (IOException e) {
+            log.error("成绩导出失败", e);
             throw new GradeBusinessException("成绩导出失败", e);
         }
     }
+
 
 
     @Override
