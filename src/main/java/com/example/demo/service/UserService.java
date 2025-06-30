@@ -8,4 +8,6 @@ public interface UserService {
     Student getStudentById(String studentId);
     void updateTeacherInfo(Teacher teacher);
     void updateStudentInfo(Student student);
+    boolean changePassword(String userId, String userType, String oldPassword, String newPassword);
+
 }

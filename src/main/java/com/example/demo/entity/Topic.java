@@ -2,6 +2,8 @@ package com.example.demo.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+
 import lombok.Data;
 
 @Data
@@ -16,6 +18,8 @@ public class Topic {
     private String content;
 
     // 关联查询时使用
+    @TableField(exist = false)
     private String teacherName;
+    @TableField(exist = false)
     private String departmentName;
 }

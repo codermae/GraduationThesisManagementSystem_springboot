@@ -107,7 +107,7 @@ public class FileUploadServiceImpl extends ServiceImpl<FileUploadMapper, FileUpl
             throw new FileBusinessException("文件不存在或无权限删除");
         }
 
-        // 逻辑删除
+        // 逻辑删除、软删除
         boolean result = removeById(fileId);
 
         // 删除磁盘文件
@@ -194,15 +194,26 @@ public class FileUploadServiceImpl extends ServiceImpl<FileUploadMapper, FileUpl
         try {
             File destFile = new File(filePath);
             File parentDir = destFile.getParentFile();
+
+            log.info("准备保存文件至路径: {}", destFile.getAbsolutePath());
+
             if (!parentDir.exists()) {
-                parentDir.mkdirs();
+                boolean success = parentDir.mkdirs();
+                if (!success) {
+                    log.warn("创建目录失败，请检查权限和路径合法性: {}", parentDir.getAbsolutePath());
+                    throw new FileBusinessException("无法创建文件存储目录");
+                }
             }
+
             file.transferTo(destFile);
+
         } catch (IOException e) {
             log.error("文件保存失败: {}", e.getMessage(), e);
             throw new FileBusinessException("文件保存失败");
         }
     }
+
+
 
     private void deletePhysicalFile(String filePath) {
         try {

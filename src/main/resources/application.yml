@@ -3,7 +3,7 @@ server:
 
 file:
   upload:
-    path: ./uploads/
+    path: D:/1homework/rjgc/
   download:
     url-prefix: /api/files/download/
 
