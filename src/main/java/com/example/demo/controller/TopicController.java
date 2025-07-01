@@ -51,6 +51,8 @@ public class TopicController {
      */
     @GetMapping
     public Result<IPage<TopicResponse>> getTopicPage(TopicQueryRequest request) {
+        System.out.println("============================================");
+        System.out.println("TopicQueryRequest: " + request); // 打印请求参数
         IPage<TopicResponse> page = topicService.getTopicPage(request);
         return Result.success(page);
     }
