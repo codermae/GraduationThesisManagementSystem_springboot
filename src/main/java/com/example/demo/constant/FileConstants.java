@@ -11,7 +11,7 @@ public class FileConstants {
 
     // 允许的文件类型
     public static final String[] ALLOWED_FILE_TYPES = {
-            "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt"
+            "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "zip"
     };
 
     // 文件大小限制（50MB）

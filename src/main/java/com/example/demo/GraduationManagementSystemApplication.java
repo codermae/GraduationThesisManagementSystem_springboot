@@ -16,7 +16,7 @@ public class GraduationManagementSystemApplication {
         System.out.println("===============================================");
         System.out.println("毕业设计文档资料管理系统启动成功！");
         System.out.println("访问地址：http://localhost:8080");
-        System.out.println("API文档：http://localhost:8080/api/auth/validate");
+//        System.out.println("API文档：http://localhost:8080/api/auth/validate");
         System.out.println("===============================================");
     }
 }

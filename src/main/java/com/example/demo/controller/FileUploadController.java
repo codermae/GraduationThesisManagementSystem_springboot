@@ -62,20 +62,45 @@ public class FileUploadController {
     /**
      * 分页查询文件列表（老师查看所有，学生查看自己的）
      */
+//    @PostMapping("/page")
+//    public Result<IPage<FileResponse>> queryFilePage(@RequestBody FileQueryRequest request) {
+//        HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+//        String currentUserId = UserContextUtil.getCurrentUserId(httpRequest);
+//        String userRole = UserContextUtil.getCurrentUserRole(httpRequest);
+//
+//        // 学生只能查看自己的文件
+//        if ("student".equals(userRole)) {
+//            request.setStudentId(currentUserId);
+//        }
+//
+//        IPage<FileResponse> result = fileUploadService.queryFilePage(request);
+//        return Result.success(result);
+//    }
+
+    /**
+     * 分页查询文件列表（老师查看选择了自己课题的学生文件，学生查看自己的文件）
+     */
     @PostMapping("/page")
     public Result<IPage<FileResponse>> queryFilePage(@RequestBody FileQueryRequest request) {
         HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String currentUserId = UserContextUtil.getCurrentUserId(httpRequest);
         String userRole = UserContextUtil.getCurrentUserRole(httpRequest);
 
-        // 学生只能查看自己的文件
         if ("student".equals(userRole)) {
+            // 学生只能查看自己的文件
             request.setStudentId(currentUserId);
+            request.setTeacherId(null); // 清除teacherId参数
+        } else if ("teacher".equals(userRole)) {
+            // 老师查看选择了自己课题的学生文件
+            request.setTeacherId(currentUserId);
+            // 如果前端传了studentId，保留（用于老师查看指定学生的文件）
+            // 如果没传studentId，则查看所有选择了自己课题的学生文件
         }
 
         IPage<FileResponse> result = fileUploadService.queryFilePage(request);
         return Result.success(result);
     }
+
 
     /**
      * 查询学生文件列表

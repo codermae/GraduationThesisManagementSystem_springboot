@@ -71,4 +71,13 @@ public interface FileUploadService extends IService<FileUpload> {
      * 验证文件大小
      */
     void validateFileSize(long fileSize);
+
+    /**
+     * 验证老师是否有权限查看指定学生的文件
+     * @param teacherId 老师ID
+     * @param studentId 学生ID
+     * @return 是否有权限
+     */
+    boolean validateTeacherStudentPermission(String teacherId, String studentId);
+
 }

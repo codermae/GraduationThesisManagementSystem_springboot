@@ -2,6 +2,7 @@ package com.example.demo.dto;
 
 import lombok.Data;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class TopicResponse {
@@ -16,5 +17,5 @@ public class TopicResponse {
     private Boolean isSelected;
     private String selectedStudentId;
     private String selectedStudentName;
-    private LocalDate selectionDate;
+    private LocalDateTime selectionDate;
 }

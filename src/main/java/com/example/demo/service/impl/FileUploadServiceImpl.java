@@ -7,8 +7,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.constant.FileConstants;
 import com.example.demo.dto.*;
 import com.example.demo.entity.FileUpload;
+import com.example.demo.entity.TopicSelection;
 import com.example.demo.exception.FileBusinessException;
 import com.example.demo.mapper.FileUploadMapper;
+import com.example.demo.mapper.TopicSelectionMapper;
 import com.example.demo.service.FileUploadService;
 import com.example.demo.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 public class FileUploadServiceImpl extends ServiceImpl<FileUploadMapper, FileUpload> implements FileUploadService {
 
     private final FileUploadMapper fileUploadMapper;
+    private final TopicSelectionMapper topicSelectionMapper;
 
     @Value("${file.upload.path:./uploads/}")
     private String uploadPath;
@@ -283,5 +286,16 @@ public class FileUploadServiceImpl extends ServiceImpl<FileUploadMapper, FileUpl
         result.put("filesByCategory", filesByCategory);
 
         return result;
+    }
+
+    @Override
+    public boolean validateTeacherStudentPermission(String teacherId, String studentId) {
+        // 查询TopicSelection表，验证该学生是否选择了该老师的课题
+        LambdaQueryWrapper<TopicSelection> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(TopicSelection::getTeacherId, teacherId)
+                .eq(TopicSelection::getStudentId, studentId);
+
+        // 这里需要注入TopicSelectionMapper或Service
+        return topicSelectionMapper.selectCount(wrapper) > 0;
     }
 }

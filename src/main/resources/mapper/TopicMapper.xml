@@ -15,7 +15,7 @@
         <result column="is_selected" property="isSelected"/>
         <result column="selected_student_id" property="selectedStudentId"/>
         <result column="selected_student_name" property="selectedStudentName"/>
-        <result column="selection_date" property="selectionDate"/>
+        <result column="selection_date" property="selectionDate" jdbcType="TIMESTAMP" javaType="java.time.LocalDateTime"/>
     </resultMap>
 
     <!-- 分页查询题目列表 -->

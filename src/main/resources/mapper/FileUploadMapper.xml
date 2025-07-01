@@ -16,6 +16,36 @@
         <result property="remarks" column="remarks"/>
     </resultMap>
 
+<!--    <select id="selectFilePageWithStudent" resultMap="FileResponseMap">-->
+<!--        SELECT-->
+<!--        f.file_id,-->
+<!--        f.student_id,-->
+<!--        s.name as student_name,-->
+<!--        f.file_name,-->
+<!--        f.original_name,-->
+<!--        f.file_size,-->
+<!--        f.file_type,-->
+<!--        f.file_category,-->
+<!--        f.upload_time,-->
+<!--        f.remarks-->
+<!--        FROM file_upload f-->
+<!--        LEFT JOIN Student s ON f.student_id = s.student_id-->
+<!--        WHERE f.is_deleted = 0-->
+<!--        <if test="req.studentId != null and req.studentId != ''">-->
+<!--            AND f.student_id = #{req.studentId}-->
+<!--        </if>-->
+<!--        <if test="req.fileName != null and req.fileName != ''">-->
+<!--            AND f.original_name LIKE CONCAT('%', #{req.fileName}, '%')-->
+<!--        </if>-->
+<!--        <if test="req.fileCategory != null and req.fileCategory != ''">-->
+<!--            AND f.file_category = #{req.fileCategory}-->
+<!--        </if>-->
+<!--        <if test="req.fileType != null and req.fileType != ''">-->
+<!--            AND f.file_type = #{req.fileType}-->
+<!--        </if>-->
+<!--        ORDER BY f.upload_time DESC-->
+<!--    </select>-->
+
     <select id="selectFilePageWithStudent" resultMap="FileResponseMap">
         SELECT
         f.file_id,
@@ -30,9 +60,15 @@
         f.remarks
         FROM file_upload f
         LEFT JOIN Student s ON f.student_id = s.student_id
+        <if test="req.teacherId != null and req.teacherId != ''">
+            INNER JOIN TopicSelection ts ON f.student_id = ts.student_id
+        </if>
         WHERE f.is_deleted = 0
         <if test="req.studentId != null and req.studentId != ''">
             AND f.student_id = #{req.studentId}
+        </if>
+        <if test="req.teacherId != null and req.teacherId != ''">
+            AND ts.teacher_id = #{req.teacherId}
         </if>
         <if test="req.fileName != null and req.fileName != ''">
             AND f.original_name LIKE CONCAT('%', #{req.fileName}, '%')
@@ -42,6 +78,12 @@
         </if>
         <if test="req.fileType != null and req.fileType != ''">
             AND f.file_type = #{req.fileType}
+        </if>
+        <if test="req.uploadTimeStart != null and req.uploadTimeStart != ''">
+            AND f.upload_time >= #{req.uploadTimeStart}
+        </if>
+        <if test="req.uploadTimeEnd != null and req.uploadTimeEnd != ''">
+            AND f.upload_time &lt;= #{req.uploadTimeEnd}
         </if>
         ORDER BY f.upload_time DESC
     </select>

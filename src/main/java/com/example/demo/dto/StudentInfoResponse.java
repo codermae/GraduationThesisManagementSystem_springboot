@@ -2,6 +2,7 @@ package com.example.demo.dto;
 
 import lombok.Data;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class StudentInfoResponse {
@@ -13,7 +14,7 @@ public class StudentInfoResponse {
     // 选题相关信息
     private String topicId;
     private String topicTitle;
-    private LocalDate selectionDate;
+    private LocalDateTime selectionDate;
 
     // 论文相关信息
     private Double thesisScore;

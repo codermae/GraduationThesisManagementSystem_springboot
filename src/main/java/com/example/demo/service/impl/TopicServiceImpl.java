@@ -19,6 +19,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -174,7 +175,7 @@ public class TopicServiceImpl implements TopicService {
         selection.setStudentId(currentUserId);
         selection.setTopicId(request.getTopicId());
         selection.setTeacherId(topic.getTeacherId());
-        selection.setSelectionDate(LocalDate.now());
+        selection.setSelectionDate(LocalDateTime.now());
 
         topicSelectionService.createSelection(selection);
     }
