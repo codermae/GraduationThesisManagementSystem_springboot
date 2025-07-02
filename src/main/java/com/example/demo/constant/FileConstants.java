@@ -23,11 +23,11 @@ public class FileConstants {
     // 文件类别映射
     public static String getCategoryName(String category) {
         switch (category) {
-            case CATEGORY_PROPOSAL: return "开题报告";
-            case CATEGORY_REPORT: return "实习报告";
-            case CATEGORY_THESIS: return "毕业论文";
-            case CATEGORY_OTHER: return "其他文档";
-            default: return "未知类别";
+            case CATEGORY_PROPOSAL: return "PROPOSAL";
+            case CATEGORY_REPORT: return "REPORT";
+            case CATEGORY_THESIS: return "THESIS";
+            case CATEGORY_OTHER: return "OTHER";
+            default: return "whatsThis";
         }
     }
 }
